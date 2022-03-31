@@ -1,4 +1,6 @@
 // import { ServerConfig } from 'ywapi2ts'
+import _ from 'lodash'
+
 const generateApiFileCode = (api) => {
   // console.log(JSON.stringify(api.yapiBaseInfo, null, 2))
   const isParamsUrl = api.path.indexOf('{') > -1
@@ -61,12 +63,13 @@ const generateApiFileCode = (api) => {
 const config = [
   {
     target: 'ts',
-    serverUrl: 'https://yapi.weierai.com',
+    serverUrl: 'http://yapi.smart-xwork.cn',
     outputFilePath: 'api',
-    projectId: '360',
-    generateApiName: (path, _id) => {
-      return `api${_id}`
+    projectId: '145124',
+    generateApiName: (path, _id, method) => {
+      return _.camelCase(path) + _.upperFirst(method.toLocaleLowerCase())
     },
+    notCheckGit: true,
     generateApiFileCode,
     // 不生成 updateJson
     generateUpdateJson: false,
@@ -74,11 +77,12 @@ const config = [
     generateIndexFile: false,
     customizeFilter: (api, { currentGitBranch }) => {
       // 采用 git 分支号做多版本并行的标识
-      const { tag } = api.yapiBaseInfo
-      if (tag.includes(currentGitBranch)) {
-        console.log(api.id)
-      }
-      return tag.includes(currentGitBranch)
+      // const { tag } = api.yapiBaseInfo
+      // if (tag.includes(currentGitBranch)) {
+      //   console.log(api.id)
+      // }
+      // return tag.includes(currentGitBranch)
+      return true
     }
   }
 ]

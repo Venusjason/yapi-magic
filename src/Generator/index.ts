@@ -103,6 +103,8 @@ export class Generator {
     const yapiUser = {
       email: '',
       password: '',
+      _yapi_token: '',
+      _yapi_uid: '',
     }
     const file = path.resolve(USER_HOME, '.yapiUser')
     if (!fs.existsSync(file)) {
@@ -111,8 +113,23 @@ export class Generator {
       const conf = JSON.parse(fs.readFileSync(file, 'utf-8'))
       Object.assign(yapiUser, conf)
     }
-    // 自动登录
-    const { _yapi_token, _yapi_uid } = await userLogin(yapiUser.email, yapiUser.password)
+
+    if (!yapiUser.email && !yapiUser._yapi_token) {
+      console.warn(`没有检测到匹配的账号配置`)
+      console.warn(`请配置 (email & password) || (_yapi_token & _yapi_uid) `)
+    }
+
+    let _yapi_token, _yapi_uid
+    if (yapiUser.email && yapiUser.password) {
+      // 自动登录
+      const { _yapi_token: a, _yapi_uid: b } = await userLogin(yapiUser.email, yapiUser.password)
+      _yapi_token = a
+      _yapi_uid = b
+    } else {
+      _yapi_token = yapiUser._yapi_token
+      _yapi_uid = yapiUser._yapi_uid
+    }
+
     // 获取api
     const url = `${serverUrl}/api/plugin/export?type=json&pid=${projectId}&status=all&isWiki=false`
 
@@ -224,6 +241,7 @@ export class Generator {
             name: this.generateApiName({
               path,
               _id,
+              method: file.method,
             }),
             yapiBaseInfo: {
               ...file
@@ -235,9 +253,10 @@ export class Generator {
           const name = this.generateApiName({
             path: apiItem.path,
             _id: apiItem._id,
+            method: apiItem.method,
           })
-          const reqInterfaceName = `IReq${name}`
-          const resInterfaceName = `IRes${name}`
+          const reqInterfaceName = `IReq${_.upperFirst(name)}`
+          const resInterfaceName = `IRes${_.upperFirst(name)}`
           let requestInterface = await this.generateRequestDataType(apiItem, reqInterfaceName)
           let responseInterface = await this.generateResponseDataType({
             interfaceInfo: apiItem,
@@ -271,10 +290,11 @@ export class Generator {
       const arr: Types.IOutPut[] = []
       filesDesc.forEach(files => {
         files.list.forEach(file => {
-          const { path, _id } = file
+          const { path, _id, method } = file
           const name = this.generateApiName({
             path,
             _id,
+            method,
           })
           // pascalCase
           const item = {
@@ -554,12 +574,14 @@ ${exportStr}
   generateApiName({
     path,
     _id,
+    method,
   }: {
     path: string,
     _id: string | number,
+    method: string,
   }): string {
     if (this.config.generateApiName) {
-      return this.config.generateApiName(path, _id)
+      return this.config.generateApiName(path, _id, method)
     }
     const reg = new RegExp('/', 'g')
     let name = path.replace(reg, ' ').trim()

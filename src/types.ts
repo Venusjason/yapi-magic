@@ -289,11 +289,8 @@ export interface ServerConfig {
   ) => boolean,
   /**
    * 文件名称生成规则
-   * @param  {string} path 接口路径 url
-   * @param  {string} _id 接口id
-   * @param  {string} projectId 项目id
    */
-  generateApiName?: (path: string, _id: string | number) => string,
+  generateApiName?: (path: string, _id: string | number, method: string) => string,
   /**
    * 自定义代码片段函数
    * 不配置的话会有默认代码片段
