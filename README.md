@@ -9,7 +9,7 @@
 ## 外网安装
 
 ```
-npm i @weier/yapiMagic -g
+npm i @bwyd/yapiMagic -g
 
 ```
 
@@ -22,6 +22,15 @@ npm i @weier/yapiMagic -g
 {
   "email": "xxxx",
   "password": "xxxx"
+}
+```
+
+或者
+
+```
+{
+  "_yapi_token": "xxxxx",
+  "_yapi_uid": "xxxxx"
 }
 ```
 
@@ -53,21 +62,8 @@ npm i @weier/yapiMagic -g
     * @example 'http://yapi.ywwl.org/project/24/interface/api' projectId 对应 24
     */
     projectId: string,
-    /** cookie _yapi_token */
-    _yapi_token: string,
-    /** cookie _yapi_uid */
-    _yapi_uid: string,
     /**
-    * 是否自动开启changelog视图
-    * generateUpdateJson 为 true时生效
-    */
-    changelog: boolean,
-    /**
-    * 1.1.0新增 是否生成 updateJson 文件, 默认 false
-    */
-    generateUpdateJson: boolean,
-    /**
-    * 1.1.0新增 是否生成 index 文件入口, 默认 false
+    * 1.1.0新增 是否生成 index 文件入口, 默认 false,不建议开启
     */
     generateIndexFile: boolean,
     /** api.d.ts 全局声明的命名空间 会包含所有的接口interface 默认值 YapiTypes */
@@ -77,7 +73,7 @@ npm i @weier/yapiMagic -g
     *
     * 可以是 `相对路径` 或 `绝对路径`。
     *
-    * @example 'src/api/index.ts'
+    * @example 'src/api'
     */
     outputFilePath: string,
     /**
@@ -91,19 +87,19 @@ npm i @weier/yapiMagic -g
       include?: string[],
     },
     /**
-    * 过滤需要比对的文件方法
+    * 过滤需要比对的文件方法,用于在多迭代并行的项目
     * currentGitBranch 当前git分支号
     */
     customizeFilter?: (api: IOutPut, opt: {
       currentGitBranch: string,
     }) => boolean,
     /**
-    * 文件名称生成规则
+    * 文件名称生成规则,默认使用path+method 的小驼峰命名,也可以采用id重写
     * @param  {string} path 接口路径 url
     * @param  {string} _id 接口id
-    * @param  {string} projectId 项目id
+    * @param  {string} method 请求方法
     */
-    generateApiName?: (path: string, _id: string | number) => string,
+    generateApiName?: (path: string, _id: string | number， method: string) => string,
     /**
     * 自定义代码片段函数
     * 不配置的话会有默认代码片段
@@ -153,13 +149,9 @@ npm i @weier/yapiMagic -g
 
 const config = {
   target: 'ts',
-  serverUrl: 'https://yapi.weierai.com',
+  serverUrl: 'https://yapi.com',
   outputFilePath: 'src/api',
   projectId: '48',
-  // 不生成 updateJson
-  generateUpdateJson: false,
-  // 不生成 index文件
-  generateIndexFile: false,
   generateApiFileCode: (api) => {
     const arr = [
       `

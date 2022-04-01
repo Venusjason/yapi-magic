@@ -88,7 +88,7 @@
     "commander": "^2.19.0",
     "consola": "^2.3.0",
     "exec-sh": "^0.3.4",
-    "express": "^4.16.4",
+    "express": "4.16.4",
     "fs-extra": "^7.0.1",
     "git-diff": "^2.0.6",
     "json-schema-generator": "^2.0.6",
