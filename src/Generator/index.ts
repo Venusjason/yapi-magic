@@ -257,11 +257,11 @@ export class Generator {
           })
           const reqInterfaceName = `IReq${_.upperFirst(name)}`
           const resInterfaceName = `IRes${_.upperFirst(name)}`
-          function stillThen (asyncFn) {
+          function stillThen (asyncFn: any): Promise<string> {
             return new Promise((reslove, reject) => {
-              asyncFn().then(reslove).catch((err) => {
+              asyncFn().then(reslove).catch((err: any) => {
                 consola.warn(`stillThen error: ${name}`, err);
-                reslove(false)
+                reslove('')
               })
             })
           }
