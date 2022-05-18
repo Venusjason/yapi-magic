@@ -65,7 +65,7 @@ const config = [
     target: 'ts',
     serverUrl: 'http://yapi.smart-xwork.cn',
     outputFilePath: 'api',
-    projectId: '145124',
+    projectId: '147404',
     generateApiName: (path, _id, method) => {
       return _.camelCase(path) + _.upperFirst(method.toLocaleLowerCase())
     },

@@ -257,12 +257,29 @@ export class Generator {
           })
           const reqInterfaceName = `IReq${_.upperFirst(name)}`
           const resInterfaceName = `IRes${_.upperFirst(name)}`
-          let requestInterface = await this.generateRequestDataType(apiItem, reqInterfaceName)
-          let responseInterface = await this.generateResponseDataType({
+          function stillThen (asyncFn) {
+            return new Promise((reslove, reject) => {
+              asyncFn().then(reslove).catch((err) => {
+                consola.warn(`stillThen error: ${name}`, err);
+                reslove(false)
+              })
+            })
+          }
+          let requestInterface = await stillThen(() => this.generateRequestDataType(apiItem, reqInterfaceName))
+          let responseInterface = await stillThen(() => this.generateResponseDataType({
             interfaceInfo: apiItem,
             typeName: resInterfaceName,
             dataKey: this.config.projectId,
-          })
+          }))
+
+          if (!requestInterface) {            
+            requestInterface = `export class ${reqInterfaceName} {}`
+          }
+          if (!responseInterface) {
+            responseInterface = `export class ${resInterfaceName} {}`
+          }
+          
+          
 
           // 输出class 便于使用类型
           requestInterface = requestInterface.replace('export interface', 'export class')
@@ -318,7 +335,7 @@ export class Generator {
       })
       return arr
     } catch (e) {
-      consola.error(`遇到错误，流程已中断`)
+      consola.error(`遇到错误，流程已中断`, e)
       return Promise.reject(e)
     }
   }
